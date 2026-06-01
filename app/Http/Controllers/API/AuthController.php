@@ -64,7 +64,7 @@ class AuthController extends Controller
         ]);
 
         $otp = $this->generateOtp();
-        $expiresAt = Carbon::now()->addMinutes(30);
+        $expiresAt = Carbon::now()->addSeconds(120);
 
         $pending = PendingRegistration::updateOrCreate(
             ['email' => $validated['email']],
@@ -124,7 +124,7 @@ Storage::disk('public')->put($backPath, file_get_contents($backFile->getPathname
         $data['id_photo_back'] = $backPath;
 
         $otp = $this->generateOtp();
-        $expiresAt = Carbon::now()->addMinutes(30);
+        $expiresAt = Carbon::now()->addSeconds(120);
 
         PendingRegistration::updateOrCreate(
             ['email' => $validated['email']],
@@ -197,6 +197,7 @@ public function deleteAccountRequest(Request $request)
     ]);
 }
 
+
 private function handleDeleteAccountOtp($email, $code)
 {
     $otpRecord = OtpVerification::where('email', $email)
@@ -235,6 +236,7 @@ private function handleDeleteAccountOtp($email, $code)
         $user->delete();
         $message = 'account_soft_deleted_will_be_permanently_removed_after_30_days';
     }
+
 
     $otpRecord->delete();
 
@@ -388,7 +390,7 @@ private function handleDeleteAccountOtp($email, $code)
             $newOtp = $this->generateOtp();
             $pending->update([
                 'otp_code' => bcrypt($newOtp),
-                'otp_expires_at' => Carbon::now()->addMinutes(30),
+                'otp_expires_at' => Carbon::now()->addSeconds(120),
                 'otp_attempts' => 0,
             ]);
             $this->sendOtp($request->email, $newOtp, 'register');
@@ -413,7 +415,7 @@ private function handleDeleteAccountOtp($email, $code)
         $newOtp = $this->generateOtp();
         $otpRecord->update([
             'code' => bcrypt($newOtp),
-            'expires_at' => Carbon::now()->addMinutes(30),
+            'expires_at' => Carbon::now()->addSeconds(120),
             'attempts' => 0,
             'is_verified' => false,
             'verified_at' => null,
@@ -445,7 +447,7 @@ private function handleDeleteAccountOtp($email, $code)
         }
 
         $otp = $this->generateOtp();
-        $expiresAt = Carbon::now()->addMinutes(30);
+        $expiresAt = Carbon::now()->addSeconds(120);
         OtpVerification::updateOrCreate(
             ['email' => $user->email, 'type' => 'login'],
             [
@@ -485,7 +487,7 @@ private function handleDeleteAccountOtp($email, $code)
         }
 
         $otp = $this->generateOtp();
-        $expiresAt = Carbon::now()->addMinutes(30);
+        $expiresAt = Carbon::now()->addSeconds(120);
         OtpVerification::updateOrCreate(
             ['email' => $user->email, 'type' => 'forgot_password'],
             [
@@ -596,6 +598,7 @@ private function handleDeleteAccountOtp($email, $code)
             ]
         ]);
     }
+
 
     public function logout(Request $request)
     {
