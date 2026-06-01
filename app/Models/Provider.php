@@ -100,7 +100,7 @@ class Provider extends Model
    
     public function getPhotoAttribute(): ?string
     {
-        return $this->id_photo_front ?? null;
+        return $this->user?->photo ?? null;
     }
 
 
