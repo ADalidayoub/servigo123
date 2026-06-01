@@ -250,7 +250,7 @@ public function myRatings()
     if ($ratings->isEmpty()) {
         return response()->json([
             'success' => true,
-            'message' => 'no_ratings_found',
+            'message' => 'success',
             'data' => []
         ]);
     }
