@@ -16,7 +16,7 @@ class Provider extends Model
         'user_id', 'location_name', 'latitude', 'longitude', 'location_description',
         'work_type', 'main_service_id', 'sub_service_id', 'id_photo_front', 'id_photo_back',
         'status', 'rejection_reason', 'profile_completed', 'currency', 'min_price', 'max_price',
-        'work_start_time', 'work_end_time', 'overnight', 'about_me'
+        'work_start_time', 'work_end_time', 'overnight', 'about_me', 'is_available'
     ];
 
     protected $casts = [
