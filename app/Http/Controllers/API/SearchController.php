@@ -104,12 +104,12 @@ class SearchController extends Controller
             return $validator;
         }
 
-        $query = Provider::query()
-            ->where('status', 'approved')
-            ->where('profile_completed', true)
-            ->where('is_available', true)
-            ->with('user')
-            ->withAvg('ratings', 'rating');
+$query = Provider::query()
+    ->where('status', 'approved')
+    ->where('profile_completed', true)
+    ->with('user')
+    ->withAvg('ratings', 'rating');
+
 
         $query->where('main_service_id', $request->main_service_id);
 
@@ -137,7 +137,11 @@ class SearchController extends Controller
             $query->where('work_type', $request->work_type);
         }
 
-        if ($request->has('availability') && $request->availability === 'available_now') {
+        if ($request->has('availability') && $request->availability === 'available_now')
+            
+            {
+                $query->where('is_available', true);
+
             $query->where(function($q) {
                 $now = Carbon::now();
                 $currentTime = $now->format('H:i:s');
