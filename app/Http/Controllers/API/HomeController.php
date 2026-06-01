@@ -41,9 +41,8 @@ class HomeController extends Controller
                 ];
             });
 
-        if ($favourites->isNotEmpty()) {
-            $data['favorites'] = $favourites;
-        }
+  $data['favorites'] = $favourites;
+
 
         $ads = Ad::where('is_active', true)
             ->with('provider.provider')
