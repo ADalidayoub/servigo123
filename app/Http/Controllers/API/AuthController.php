@@ -657,7 +657,7 @@ private function handleDeleteAccountOtp($email, $code)
                 'token' => $accessToken,
                 'refresh_token' => $refreshToken,
                 'role' => 'user',
-                'is_banned' => $user->is_banned,
+                'is_banned' => (bool) $user->is_banned,
                 'message' => 'welcome'
             ]
         ]);
