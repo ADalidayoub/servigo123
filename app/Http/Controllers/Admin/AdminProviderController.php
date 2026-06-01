@@ -283,23 +283,27 @@ class AdminProviderController extends Controller
         ]);
     }
 
-    public function delete($providerId)
-    {
-        $provider = Provider::with('user')->find($providerId);
+public function delete($providerId)
+{
+    $provider = Provider::with('user')->find($providerId);
 
-        if (!$provider) {
-            return response()->json(['success' => false, 'message' => 'provider_not_found'], 404);
-        }
-
-        $provider->user->tokens()->delete();
-        $provider->delete();
-        $provider->user->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Provider deleted successfully. Data will be permanently removed after 30 days.',
-        ]);
+    if (!$provider) {
+        return response()->json(['success' => false, 'message' => 'provider_not_found'], 404);
     }
+
+    $provider->user->tokens()->delete();
+    $provider->delete();
+    $provider->user->delete();
+
+    \App\Jobs\PermanentlyDeleteProvider::dispatch($providerId)
+        ->delay(now()->addDays(30));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Provider deleted successfully. Data will be permanently removed after 30 days.',
+    ]);
+}
+
 
     public function update(Request $request, $providerId)
     {
