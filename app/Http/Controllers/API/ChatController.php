@@ -256,7 +256,8 @@ class ChatController extends Controller
         $message = Message::create([
             'chat_id' => $chatId,
             'sender_id' => $user->id,
-            'content' => $request->content,
+            'content' => $request->input('content'),
+
             'image_url' => $imageUrl,
             'video_url' => $videoUrl,
         ]);
@@ -281,12 +282,9 @@ class ChatController extends Controller
         ], 201);
     }
 
-    private function getUserPhoto($user)
-    {
-        if ($user->role === 'provider' && $user->provider) {
-            return $user->provider->id_photo_front ?? null;
-        }
-        
-        return null;
-    }
+private function getUserPhoto($user)
+{
+    return $user->photo ?? null;
+}
+
 }
