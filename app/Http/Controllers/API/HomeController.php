@@ -29,7 +29,7 @@ class HomeController extends Controller
                 return [
                     'provider_user_id' => $providerUser->id,
                     'name' => $providerUser->name,
-                    'photo' => $provider?->id_photo_front,
+                    'photo' => $providerUser->photo ?? null,
                     'main_service' => $provider?->mainService ? [
                         'name_ar' => $provider->mainService->name_ar,
                         'name_en' => $provider->mainService->name_en,
@@ -56,7 +56,7 @@ class HomeController extends Controller
                     'ad_id' => $ad->id,
                     'provider_user_id' => $providerUser->id,
                     'provider_name' => $providerUser->name,
-                    'provider_photo' => $providerProfile?->id_photo_front,
+                    'provider_photo' => $providerUser->photo ?? null,
                     'ad_image' => $ad->image,
                     'description' => $ad->description,
                 ];
