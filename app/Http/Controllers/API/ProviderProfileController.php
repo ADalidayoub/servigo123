@@ -139,6 +139,8 @@ class ProviderProfileController extends Controller
             'overnight' => 'nullable|boolean',
             'about_me' => 'nullable|string',
             'is_available' => 'nullable|boolean',
+            'off_days' => 'nullable|array',
+'off_days.*' => 'in:sunday,monday,tuesday,wednesday,thursday,friday,saturday',
         ]);
 
         DB::beginTransaction();
