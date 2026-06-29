@@ -51,7 +51,9 @@ Route::prefix('chat')->middleware(['auth:sanctum'])->group(function () {
 });
 Route::prefix('chat/admins')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', [AdminChatController::class, 'listAdmins']);
+    Route::post('/{adminId}/send', [AdminChatController::class, 'sendMessage']);
 });
+
 
 
 // ==================== Search Routes ====================
