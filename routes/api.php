@@ -178,4 +178,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/reports/complaints/{complaintId}/ban', [AdminReportController::class, 'banComplaintProvider']);
         Route::delete('/reports/complaints/{complaintId}', [AdminReportController::class, 'dismissComplaint']);
     });
+            Route::post('/customers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
+
+    
 });
