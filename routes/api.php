@@ -3,6 +3,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProviderController;
 use App\Http\Controllers\API\SearchController;
 use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\AdminChatController;
 use App\Http\Controllers\API\ProviderProfileController;
 use App\Http\Controllers\API\CustomerProfileController;
 use App\Http\Controllers\API\ProfileController;
@@ -48,6 +49,10 @@ Route::prefix('chat')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/{chatId}/messages', [ChatController::class, 'getMessages']);
     Route::post('/{chatId}/send', [ChatController::class, 'sendMessage']);
 });
+Route::prefix('chat/admins')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/', [AdminChatController::class, 'listAdmins']);
+});
+
 
 // ==================== Search Routes ====================
 Route::prefix('search')->middleware(['auth:sanctum'])->group(function () {
