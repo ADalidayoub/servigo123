@@ -117,6 +117,48 @@ class AdminChatController extends Controller
             ]
         ], 201);
     }
+        public function getMessages($adminChatId)
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
+        }
+
+        $adminChat = AdminChat::find($adminChatId);
+
+        if (!$adminChat) {
+            return response()->json(['success' => false, 'message' => 'chat_not_found'], 404);
+        }
+
+        if ($adminChat->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'forbidden'], 403);
+        }
+
+        $messages = $adminChat->messages()->orderBy('created_at', 'asc')->get();
+
+        $data = $messages->map(function ($message) use ($user) {
+            return [
+                'id' => $message->id,
+                'sender_type' => $message->sender_type,
+                'sender_id' => $message->sender_id,
+                'content' => $message->content,
+                'image_url' => $message->image_url,
+                'video_url' => $message->video_url,
+                'created_at' => $message->created_at->toDateTimeString(),
+                'time' => $message->created_at->format('H:i'),
+                'date' => $message->created_at->format('Y-m-d'),
+                'is_mine' => $message->sender_type === 'user' && $message->sender_id === $user->id,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    
 
 
 
