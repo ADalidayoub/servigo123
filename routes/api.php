@@ -59,38 +59,38 @@ Route::prefix('chat/admins')->middleware(['auth:sanctum'])->group(function () {
 
 // ==================== Search Routes ====================
 Route::prefix('search')->middleware(['auth:sanctum'])->group(function () {
-   
+
     Route::get('/sub-services/{main_service_id}', [SearchController::class, 'getSubServices']);
-    
- 
+
+
     Route::get('/top-providers/{main_service_id}', [SearchController::class, 'getTopProviders']);
-    
+
 
     Route::get('/providers', [SearchController::class, 'searchProviders']);
 });
 
 // ==================== Ratings Routes ====================
 Route::prefix('ratings')->middleware(['auth:sanctum'])->group(function () {
-    
-   
+
+
     Route::post('/', [RatingController::class, 'store']);
-    
-    
+
+
     Route::put('/{id}', [RatingController::class, 'update']);
-    
-  
+
+
     Route::delete('/{id}', [RatingController::class, 'destroy']);
-    
-   
+
+
     Route::get('/{id}', [RatingController::class, 'show']);
-    
- 
+
+
    Route::get('/user/my_ratings', [RatingController::class, 'myRatings']);
-    
- 
+
+
     Route::get('/provider/{provider_id}', [RatingController::class, 'getProviderRatings']);
-    
-   
+
+
     Route::get('/provider/{provider_id}/average', [RatingController::class, 'getProviderAverage']);
 });
 
@@ -180,7 +180,9 @@ Route::prefix('admin')->group(function () {
     });
             Route::post('/customers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
                     Route::post('/providers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
+             Route::get('/chats', [\App\Http\Controllers\Admin\AdminChatController::class, 'chatList']);
 
 
-    
+
+
 });
