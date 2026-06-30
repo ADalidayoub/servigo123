@@ -181,6 +181,8 @@ Route::prefix('admin')->group(function () {
             Route::post('/customers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
                     Route::post('/providers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
              Route::get('/chats', [\App\Http\Controllers\Admin\AdminChatController::class, 'chatList']);
+                     Route::get('/chats/{adminChatId}/messages', [\App\Http\Controllers\Admin\AdminChatController::class, 'getMessages']);
+
 
 
 
