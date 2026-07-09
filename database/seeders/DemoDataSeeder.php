@@ -209,7 +209,7 @@ class DemoDataSeeder extends Seeder
         }
 
         // ---------------------------------------------------------------
-        // 4. Ratings (provider_id references the USER id of the provider)
+        // 4. Ratings (provider_id references the PROVIDERS table id, not users)
         // ---------------------------------------------------------------
         $usedRatingPairs = [];
         $ratings = collect();
@@ -225,7 +225,7 @@ class DemoDataSeeder extends Seeder
             $usedRatingPairs[$key] = true;
 
             $ratings->push(Rating::create([
-                'provider_id' => $provider->user_id,
+                'provider_id' => $provider->id,
                 'user_id' => $rater->id,
                 'rating' => fake()->numberBetween(1, 5),
                 'review' => fake()->boolean(70) ? fake()->realText(120) : null,
