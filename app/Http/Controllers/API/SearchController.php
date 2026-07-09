@@ -17,13 +17,13 @@ class SearchController extends Controller
     public function getSubServices($service_id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
         $mainService = Service::find($service_id);
-        
+
         if (!$mainService) {
             return response()->json(['success' => false, 'message' => 'main_service_not_found'], 404);
         }
@@ -48,13 +48,13 @@ class SearchController extends Controller
     public function getTopProviders($main_service_id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
         $mainService = Service::find($main_service_id);
-        
+
         if (!$mainService) {
             return response()->json(['success' => false, 'message' => 'main_service_not_found'], 404);
         }
@@ -94,7 +94,7 @@ class SearchController extends Controller
     public function searchProviders(Request $request)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
@@ -138,7 +138,7 @@ $query = Provider::query()
         }
 
         if ($request->has('availability') && $request->availability === 'available_now')
-            
+
             {
                 $query->where('is_available', true);
 
@@ -146,7 +146,7 @@ $query = Provider::query()
                 $now = Carbon::now();
                 $currentTime = $now->format('H:i:s');
                 $currentDay = strtolower($now->format('l'));
-                
+
                 $q->whereDoesntHave('offDays', function($off) use ($currentDay) {
                     $off->where('day', $currentDay);
                 })->where(function($time) use ($currentTime) {
@@ -158,7 +158,7 @@ $query = Provider::query()
         }
 
         $sortBy = $request->get('sort_by', 'rating');
-        
+
         if ($sortBy === 'price') {
             $query->orderBy('min_price', 'asc');
         } elseif ($sortBy === 'rating') {
@@ -245,7 +245,7 @@ $query = Provider::query()
             if (!in_array($request->sort_by, ['price', 'rating', 'location'])) {
                 return response()->json(['success' => false, 'message' => 'sort_by_invalid'], 422);
             }
-            
+
             if ($request->sort_by === 'location') {
                 if (!$request->has('latitude')) {
                     return response()->json(['success' => false, 'message' => 'latitude_required'], 422);
@@ -263,13 +263,13 @@ $query = Provider::query()
     {
         $lat = (float)$request->latitude;
         $lon = (float)$request->longitude;
-        
+
         $haversine = "(6371 * acos(
             cos(radians($lat)) * cos(radians(latitude)) *
             cos(radians(longitude) - radians($lon)) +
             sin(radians($lat)) * sin(radians(latitude))
         ))";
-        
+
         $query->select('*')
             ->selectRaw("{$haversine} AS distance")
             ->orderBy('distance', 'asc');
@@ -296,7 +296,7 @@ $query = Provider::query()
 
         $start = $provider->work_start_time;
         $end = $provider->work_end_time;
-        
+
         if ($provider->overnight) {
             return $currentTime >= $start || $currentTime <= $end;
         } else {
@@ -304,11 +304,9 @@ $query = Provider::query()
         }
     }
 
-    private function getUserPhoto($user)
-    {
-        if ($user && $user->role === 'provider' && $user->provider) {
-            return $user->provider->id_photo_front ?? null;
-        }
-        return null;
-    }
+private function getUserPhoto($user)
+{
+    return $user->photo ?? null;
+}
+
 }
