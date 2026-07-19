@@ -13,18 +13,26 @@ class HomeController extends Controller
     {
         $user = auth()->user();
 
+
         $mainServices = Service::select('id', 'name_ar', 'name_en', 'photo')->get();
 
         $data = [
             'main_services' => $mainServices,
         ];
 
+
         $favourites = Favourite::where('user_id', $user->id)
             ->with(['provider.provider.mainService', 'provider.provider.subService'])
             ->get()
             ->map(function ($fav) {
                 $providerUser = $fav->provider;
-                $provider = $providerUser?->provider;
+
+
+                if (!$providerUser) {
+                    return null;
+                }
+
+                $provider = $providerUser->provider;
 
                 return [
                     'provider_user_id' => $providerUser->id,
@@ -39,9 +47,12 @@ class HomeController extends Controller
                         'name_en' => $provider->subService->name_en,
                     ] : null,
                 ];
-            });
+            })
+            ->filter()
+            ->values();
 
-  $data['favorites'] = $favourites;
+        $data['favorites'] = $favourites;
+
 
 
         $ads = Ad::where('is_active', true)
@@ -49,7 +60,11 @@ class HomeController extends Controller
             ->get()
             ->map(function ($ad) {
                 $providerUser = $ad->provider;
-                $providerProfile = $providerUser?->provider;
+
+
+                if (!$providerUser) {
+                    return null;
+                }
 
                 return [
                     'ad_id' => $ad->id,
@@ -59,7 +74,9 @@ class HomeController extends Controller
                     'ad_image' => $ad->image,
                     'description' => $ad->description,
                 ];
-            });
+            })
+            ->filter()
+            ->values();
 
         $data['ads'] = $ads;
 
