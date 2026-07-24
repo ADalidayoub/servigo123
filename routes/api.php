@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ProviderController;
 use App\Http\Controllers\API\SearchController;
@@ -85,7 +86,7 @@ Route::prefix('ratings')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/{id}', [RatingController::class, 'show']);
 
 
-   Route::get('/user/my_ratings', [RatingController::class, 'myRatings']);
+    Route::get('/user/my_ratings', [RatingController::class, 'myRatings']);
 
 
     Route::get('/provider/{provider_id}', [RatingController::class, 'getProviderRatings']);
@@ -177,19 +178,11 @@ Route::prefix('admin')->group(function () {
         Route::get('/reports/complaints', [AdminReportController::class, 'complaints']);
         Route::post('/reports/complaints/{complaintId}/ban', [AdminReportController::class, 'banComplaintProvider']);
         Route::delete('/reports/complaints/{complaintId}', [AdminReportController::class, 'dismissComplaint']);
+
+        Route::post('/customers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
+        Route::post('/providers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
+        Route::get('/chats', [\App\Http\Controllers\Admin\AdminChatController::class, 'chatList']);
+        Route::get('/chats/{adminChatId}/messages', [\App\Http\Controllers\Admin\AdminChatController::class, 'getMessages']);
+        Route::post('/chats/{adminChatId}/send', [\App\Http\Controllers\Admin\AdminChatController::class, 'sendMessage']);
     });
-            Route::post('/customers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
-                    Route::post('/providers/{userId}/chat/start', [\App\Http\Controllers\Admin\AdminChatController::class, 'startOrGetChat']);
-             Route::get('/chats', [\App\Http\Controllers\Admin\AdminChatController::class, 'chatList']);
-                     Route::get('/chats/{adminChatId}/messages', [\App\Http\Controllers\Admin\AdminChatController::class, 'getMessages']);
-                             Route::post('/chats/{adminChatId}/send', [\App\Http\Controllers\Admin\AdminChatController::class, 'sendMessage']);
-
-                     
-                     
-                     
-
-
-
-
-
 });

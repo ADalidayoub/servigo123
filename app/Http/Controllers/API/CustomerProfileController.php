@@ -29,6 +29,7 @@ class CustomerProfileController extends Controller
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'email' => $user->email,
                 'phone' => $user->phone,
                 'photo' => $this->getUserPhoto($user),
             ]
@@ -62,6 +63,7 @@ class CustomerProfileController extends Controller
             'data' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'email' => $user->email,
                 'phone' => $user->phone,
                 'photo' => $this->getUserPhoto($user),
             ]
