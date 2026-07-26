@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\Admin;
@@ -35,6 +36,10 @@ class AdminChatController extends Controller
             ->get();
 
         $data = $chats->map(function ($chat) {
+            if (!$chat->user) {
+                return null;
+            }
+
             $lastMessage = $chat->messages->first();
 
             return [
@@ -45,7 +50,7 @@ class AdminChatController extends Controller
                 'last_message' => $lastMessage?->content ?? '',
                 'last_message_time' => $lastMessage?->created_at,
             ];
-        });
+        })->filter()->values();
 
         return response()->json([
             'success' => true,
@@ -115,8 +120,7 @@ class AdminChatController extends Controller
             'image_url' => $request->image_url,
             'video_url' => $request->video_url,
         ]);
-
-        return response()->json([
+ return response()->json([
             'success' => true,
             'data' => [
                 'id' => $message->id,
