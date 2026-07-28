@@ -191,7 +191,8 @@ class AdminProviderController extends Controller
             return response()->json(['success' => false, 'message' => 'provider_not_found'], 404);
         }
 
-        $ratings = Rating::where('provider_id', $provider->id)
+        $ratings = Rating::where('provider_id', $provider->user_id)
+
             ->with('user:id,name')
             ->latest()
             ->get()

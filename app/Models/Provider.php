@@ -13,10 +13,27 @@ class Provider extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'location_name', 'latitude', 'longitude', 'location_description',
-        'work_type', 'main_service_id', 'sub_service_id', 'id_photo_front', 'id_photo_back',
-        'status', 'rejection_reason', 'profile_completed', 'currency', 'min_price', 'max_price',
-        'work_start_time', 'work_end_time', 'overnight', 'about_me', 'is_available'
+        'user_id',
+        'location_name',
+        'latitude',
+        'longitude',
+        'location_description',
+        'work_type',
+        'main_service_id',
+        'sub_service_id',
+        'id_photo_front',
+        'id_photo_back',
+        'status',
+        'rejection_reason',
+        'profile_completed',
+        'currency',
+        'min_price',
+        'max_price',
+        'work_start_time',
+        'work_end_time',
+        'overnight',
+        'about_me',
+        'is_available'
     ];
 
     protected $casts = [
@@ -59,11 +76,12 @@ class Provider extends Model
         return $this->hasMany(Portfolio::class);
     }
 
- 
+
     public function ratings(): HasMany
     {
-        return $this->hasMany(Rating::class, 'provider_id');
+        return $this->hasMany(Rating::class, 'provider_id', 'user_id');
     }
+
 
 
     public function searchLogs(): HasMany
@@ -79,7 +97,7 @@ class Provider extends Model
         return round($this->ratings()->avg('rating') ?? 0, 1);
     }
 
- 
+
     public function getRatingsCountAttribute(): int
     {
         return $this->ratings()->count();
@@ -97,7 +115,7 @@ class Provider extends Model
         return $this->checkAvailability();
     }
 
-   
+
     public function getPhotoAttribute(): ?string
     {
         return $this->user?->photo ?? null;
@@ -107,13 +125,13 @@ class Provider extends Model
     public function scopeApproved($query)
     {
         return $query->where('status', 'approved')
-                     ->where('profile_completed', true);
+            ->where('profile_completed', true);
     }
 
 
     public function scopeNotBanned($query)
     {
-        return $query->whereHas('user', function($q) {
+        return $query->whereHas('user', function ($q) {
             $q->where('is_banned', false);
         });
     }
@@ -136,7 +154,7 @@ class Provider extends Model
         return $query;
     }
 
- 
+
     public function scopeMinRating($query, $rating)
     {
         if ($rating == 5) {
@@ -145,7 +163,7 @@ class Provider extends Model
         return $query->havingRaw('AVG(ratings.rating) >= ?', [$rating]);
     }
 
-   
+
     public function scopeWorkType($query, $type)
     {
         if ($type && in_array($type, ['fixed', 'mobile', 'both'])) {
@@ -154,46 +172,46 @@ class Provider extends Model
         return $query;
     }
 
-   
+
     public function scopeAvailableNow($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $now = now();
             $currentTime = $now->format('H:i:s');
             $currentDay = strtolower($now->format('l'));
-            
-            $q->whereDoesntHave('offDays', function($off) use ($currentDay) {
+
+            $q->whereDoesntHave('offDays', function ($off) use ($currentDay) {
                 $off->where('day', $currentDay);
-            })->where(function($time) use ($currentTime) {
+            })->where(function ($time) use ($currentTime) {
                 $time->whereNull('work_start_time')
-                     ->orWhere(function($sub) use ($currentTime) {
-                         $sub->where('work_start_time', '<=', $currentTime)
-                             ->where('work_end_time', '>=', $currentTime);
-                     })
-                     ->orWhere(function($sub) use ($currentTime) {
-                         $sub->where('overnight', true)
-                             ->where(function($night) use ($currentTime) {
-                                 $night->where('work_start_time', '<=', $currentTime)
-                                       ->orWhere('work_end_time', '>=', $currentTime);
-                             });
-                     });
+                    ->orWhere(function ($sub) use ($currentTime) {
+                        $sub->where('work_start_time', '<=', $currentTime)
+                            ->where('work_end_time', '>=', $currentTime);
+                    })
+                    ->orWhere(function ($sub) use ($currentTime) {
+                        $sub->where('overnight', true)
+                            ->where(function ($night) use ($currentTime) {
+                                $night->where('work_start_time', '<=', $currentTime)
+                                    ->orWhere('work_end_time', '>=', $currentTime);
+                            });
+                    });
             });
         });
     }
 
-  
+
     public function scopeOrderByPrice($query, $direction = 'asc')
     {
         return $query->orderBy('min_price', $direction);
     }
 
-  
+
     public function scopeOrderByRating($query, $direction = 'desc')
     {
         return $query->orderBy('avg_rating', $direction);
     }
 
-  
+
     public function scopeOrderByDistance($query, $latitude, $longitude, $direction = 'asc')
     {
         $haversine = "(6371 * acos(
@@ -201,10 +219,10 @@ class Provider extends Model
             cos(radians(longitude) - radians($longitude)) +
             sin(radians($latitude)) * sin(radians(latitude))
         ))";
-        
+
         return $query->select('*')
-                     ->selectRaw("{$haversine} AS distance")
-                     ->orderBy('distance', $direction);
+            ->selectRaw("{$haversine} AS distance")
+            ->orderBy('distance', $direction);
     }
 
 
@@ -213,16 +231,16 @@ class Provider extends Model
         $now = now();
         $currentTime = $now->format('H:i:s');
         $currentDay = strtolower($now->format('l'));
-        
+
         $offDays = $this->offDays()->pluck('day')->toArray();
         if (in_array($currentDay, $offDays)) {
             return false;
         }
-        
+
         if (!$this->work_start_time || !$this->work_end_time) {
             return true;
         }
-        
+
         if ($this->overnight) {
             return $currentTime >= $this->work_start_time || $currentTime <= $this->work_end_time;
         } else {
@@ -230,39 +248,45 @@ class Provider extends Model
         }
     }
 
-  
+
     public function distanceTo($latitude, $longitude): float
     {
         $earthRadius = 6371; // km
-        
+
         $latFrom = deg2rad($this->latitude);
         $lonFrom = deg2rad($this->longitude);
         $latTo = deg2rad($latitude);
         $lonTo = deg2rad($longitude);
-        
+
         $latDelta = $latTo - $latFrom;
         $lonDelta = $lonTo - $lonFrom;
-        
+
         $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
             cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        
+
         return $angle * $earthRadius;
     }
 
-  
+
     public function isComplete(): bool
     {
         return $this->profile_completed && $this->status === 'approved';
     }
 
-  
+
     public function updateProfileCompletion(): bool
     {
         $required = [
-            'location_name', 'latitude', 'longitude', 'work_type',
-            'main_service_id', 'min_price', 'max_price', 'about_me'
+            'location_name',
+            'latitude',
+            'longitude',
+            'work_type',
+            'main_service_id',
+            'min_price',
+            'max_price',
+            'about_me'
         ];
-        
+
         $completed = true;
         foreach ($required as $field) {
             if (empty($this->$field)) {
@@ -270,10 +294,10 @@ class Provider extends Model
                 break;
             }
         }
-        
+
         $this->profile_completed = $completed;
         $this->save();
-        
+
         return $completed;
     }
 }
