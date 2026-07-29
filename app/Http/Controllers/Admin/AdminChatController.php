@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\Admin;
@@ -25,39 +24,38 @@ class AdminChatController extends Controller
             ],
         ]);
     }
-        public function chatList()
+    public function chatList()
     {
         $admin = auth()->user();
 
         $chats = AdminChat::where('admin_id', $admin->id)
-            ->with(['user', 'messages' => function ($q) {
+            ->with(['user' => function ($q) {
+                $q->withTrashed();
+            }, 'messages' => function ($q) {
                 $q->latest()->limit(1);
             }])
             ->get();
 
         $data = $chats->map(function ($chat) {
-            if (!$chat->user) {
-                return null;
-            }
-
             $lastMessage = $chat->messages->first();
 
             return [
                 'admin_chat_id' => $chat->id,
                 'user_id' => $chat->user->id,
-                'user_name' => $chat->user->name,
-                'user_photo' => $chat->user->photo,
+                'user_name' => $chat->user->trashed() ? 'مستخدم محذوف' : $chat->user->name,
+                'user_photo' => $chat->user->trashed() ? null : $chat->user->photo,
                 'last_message' => $lastMessage?->content ?? '',
                 'last_message_time' => $lastMessage?->created_at,
             ];
-        })->filter()->values();
+        });
 
         return response()->json([
             'success' => true,
             'data' => $data,
         ]);
     }
-        public function getMessages($adminChatId)
+
+    public function getMessages($adminChatId)
     {
         $admin = auth()->user();
 
@@ -93,7 +91,7 @@ class AdminChatController extends Controller
             'data' => $data,
         ]);
     }
-        public function sendMessage(Request $request, $adminChatId)
+    public function sendMessage(Request $request, $adminChatId)
     {
         $admin = auth()->user();
 
@@ -120,7 +118,7 @@ class AdminChatController extends Controller
             'image_url' => $request->image_url,
             'video_url' => $request->video_url,
         ]);
- return response()->json([
+        return response()->json([
             'success' => true,
             'data' => [
                 'id' => $message->id,
@@ -136,7 +134,4 @@ class AdminChatController extends Controller
             ],
         ], 201);
     }
-
-
-
 }

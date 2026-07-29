@@ -97,7 +97,7 @@ class ProviderProfileController extends Controller
                     'overnight' => $provider->overnight,
                     'about_me' => $provider->about_me,
                     'off_days' => $provider->off_days_array,
-                    'is_available' => $provider->is_available,
+                    'is_available' => $provider->is_available_now,
                     'status' => $provider->status,
                     'profile_completed' => $provider->profile_completed,
                 ],
@@ -138,7 +138,7 @@ class ProviderProfileController extends Controller
             'work_end_time' => 'nullable|date_format:H:i',
             'overnight' => 'nullable|boolean',
             'about_me' => 'nullable|string',
-            'is_available' => 'nullable|boolean',
+            // 'is_available' => 'nullable|boolean',
             'off_days' => 'nullable|array',
 'off_days.*' => 'in:sunday,monday,tuesday,wednesday,thursday,friday,saturday',
         ]);

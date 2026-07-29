@@ -249,6 +249,7 @@ class Provider extends Model
     }
 
 
+
     public function distanceTo($latitude, $longitude): float
     {
         $earthRadius = 6371; // km

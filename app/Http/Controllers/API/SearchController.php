@@ -45,6 +45,51 @@ class SearchController extends Controller
         ]);
     }
 
+    // public function getTopProviders($main_service_id)
+    // {
+    //     $user = auth()->user();
+
+    //     if (!$user) {
+    //         return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
+    //     }
+
+    //     $mainService = Service::find($main_service_id);
+
+    //     if (!$mainService) {
+    //         return response()->json(['success' => false, 'message' => 'main_service_not_found'], 404);
+    //     }
+
+    //     $topProviders = Provider::where('main_service_id', $main_service_id)
+    //         ->where('status', 'approved')
+    //         ->where('profile_completed', true)
+    //         // ->where('is_available', true)
+    //         ->with('user')
+    //         ->withAvg('ratings', 'rating')
+    //         ->orderBy('ratings_avg_rating', 'desc')
+    //         ->limit(5)
+    //         ->get()
+    //         ->map(function ($provider) {
+    //             $avgRating = $provider->ratings_avg_rating ?? 0;
+    //             return [
+    //                 'provider_user_id' => $provider->user_id,
+    //                 'name' => $provider->user?->name,
+    //                 'photo' => $this->getUserPhoto($provider->user),
+    //                 'avg_rating' => round($avgRating, 1),
+    //                 'min_price' => (float)($provider->min_price ?? 0),
+    //                 'max_price' => (float)($provider->max_price ?? 0),
+    //                 'currency' => $provider->currency ?? 'USD',
+    //                 'work_type' => $provider->work_type,
+    //                 'location_name' => $provider->location_name,
+    //                 'is_available' => $this->checkAvailability($provider),
+    //             ];
+    //         });
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'success',
+    //         'data' => $topProviders
+    //     ]);
+    // }
     public function getTopProviders($main_service_id)
     {
         $user = auth()->user();
@@ -62,13 +107,12 @@ class SearchController extends Controller
         $topProviders = Provider::where('main_service_id', $main_service_id)
             ->where('status', 'approved')
             ->where('profile_completed', true)
-            ->where('is_available', true)
             ->with('user')
             ->withAvg('ratings', 'rating')
             ->orderBy('ratings_avg_rating', 'desc')
             ->limit(5)
             ->get()
-            ->map(function($provider) {
+            ->map(function ($provider) {
                 $avgRating = $provider->ratings_avg_rating ?? 0;
                 return [
                     'provider_user_id' => $provider->user_id,
@@ -80,7 +124,7 @@ class SearchController extends Controller
                     'currency' => $provider->currency ?? 'USD',
                     'work_type' => $provider->work_type,
                     'location_name' => $provider->location_name,
-                    'is_available' => $this->checkAvailability($provider),
+                    'is_available' => $provider->is_available_now,
                 ];
             });
 
@@ -90,6 +134,7 @@ class SearchController extends Controller
             'data' => $topProviders
         ]);
     }
+
 
     public function searchProviders(Request $request)
     {
@@ -104,11 +149,11 @@ class SearchController extends Controller
             return $validator;
         }
 
-$query = Provider::query()
-    ->where('status', 'approved')
-    ->where('profile_completed', true)
-    ->with('user')
-    ->withAvg('ratings', 'rating');
+        $query = Provider::query()
+            ->where('status', 'approved')
+            ->where('profile_completed', true)
+            ->with('user')
+            ->withAvg('ratings', 'rating');
 
 
         $query->where('main_service_id', $request->main_service_id);
@@ -137,25 +182,54 @@ $query = Provider::query()
             $query->where('work_type', $request->work_type);
         }
 
-        if ($request->has('availability') && $request->availability === 'available_now')
+        // if ($request->has('availability') && $request->availability === 'available_now')
 
-            {
-                $query->where('is_available', true);
+        //     {
+        //         // $query->where('is_available', true);
 
-            $query->where(function($q) {
+        //     $query->where(function($q) {
+        //         $now = Carbon::now();
+        //         $currentTime = $now->format('H:i:s');
+        //         $currentDay = strtolower($now->format('l'));
+
+        //         $q->whereDoesntHave('offDays', function($off) use ($currentDay) {
+        //             $off->where('day', $currentDay);
+        //         })->where(function($time) use ($currentTime) {
+        //             $time->whereNull('work_start_time')
+        //                  ->orWhere('work_start_time', '<=', $currentTime)
+        //                  ->where('work_end_time', '>=', $currentTime);
+        //         });
+        //     });
+        // }
+        if ($request->has('availability') && $request->availability === 'available_now') {
+            // $query->where('is_available', true);
+
+            $query->where(function ($q) {
                 $now = Carbon::now();
                 $currentTime = $now->format('H:i:s');
                 $currentDay = strtolower($now->format('l'));
 
-                $q->whereDoesntHave('offDays', function($off) use ($currentDay) {
+                $q->whereDoesntHave('offDays', function ($off) use ($currentDay) {
                     $off->where('day', $currentDay);
-                })->where(function($time) use ($currentTime) {
+                })->where(function ($time) use ($currentTime) {
                     $time->whereNull('work_start_time')
-                         ->orWhere('work_start_time', '<=', $currentTime)
-                         ->where('work_end_time', '>=', $currentTime);
+                        ->orWhereNull('work_end_time')
+                        ->orWhere(function ($normal) use ($currentTime) {
+                            $normal->where('overnight', false)
+                                ->where('work_start_time', '<=', $currentTime)
+                                ->where('work_end_time', '>=', $currentTime);
+                        })
+                        ->orWhere(function ($night) use ($currentTime) {
+                            $night->where('overnight', true)
+                                ->where(function ($nightTime) use ($currentTime) {
+                                    $nightTime->where('work_start_time', '<=', $currentTime)
+                                        ->orWhere('work_end_time', '>=', $currentTime);
+                                });
+                        });
                 });
             });
         }
+
 
         $sortBy = $request->get('sort_by', 'rating');
 
@@ -183,7 +257,21 @@ $query = Provider::query()
             ]);
         }
 
-        $formattedProviders = $providers->map(function($provider) {
+        $formattedProviders = $providers->map(function ($provider) {
+            // return [
+            //     'provider_user_id' => $provider->user_id,
+            //     'name' => $provider->user?->name,
+            //     'photo' => $this->getUserPhoto($provider->user),
+            //     'avg_rating' => round($provider->ratings_avg_rating ?? 0, 1),
+            //     'min_price' => (float)($provider->min_price ?? 0),
+            //     'max_price' => (float)($provider->max_price ?? 0),
+            //     'currency' => $provider->currency ?? 'USD',
+            //     'work_type' => $provider->work_type,
+            //     'location_name' => $provider->location_name,
+            //     'latitude' => (float)($provider->latitude ?? 0),
+            //     'longitude' => (float)($provider->longitude ?? 0),
+            //     'is_available' => $this->checkAvailability($provider),
+            // ];
             return [
                 'provider_user_id' => $provider->user_id,
                 'name' => $provider->user?->name,
@@ -196,7 +284,7 @@ $query = Provider::query()
                 'location_name' => $provider->location_name,
                 'latitude' => (float)($provider->latitude ?? 0),
                 'longitude' => (float)($provider->longitude ?? 0),
-                'is_available' => $this->checkAvailability($provider),
+                'is_available' => $provider->is_available_now,
             ];
         });
 
@@ -275,38 +363,37 @@ $query = Provider::query()
             ->orderBy('distance', 'asc');
     }
 
-    private function checkAvailability($provider)
+    // private function checkAvailability($provider)
+    // {
+    //     if (!$provider->is_available) {
+    //         return false;
+    //     }
+
+    //     if (!$provider->work_start_time || !$provider->work_end_time) {
+    //         return true;
+    //     }
+
+    //     $now = Carbon::now();
+    //     $currentTime = $now->format('H:i:s');
+    //     $currentDay = strtolower($now->format('l'));
+
+    //     $offDays = $provider->offDays()->pluck('day')->toArray();
+    //     if (in_array($currentDay, $offDays)) {
+    //         return false;
+    //     }
+
+    //     $start = $provider->work_start_time;
+    //     $end = $provider->work_end_time;
+
+    //     if ($provider->overnight) {
+    //         return $currentTime >= $start || $currentTime <= $end;
+    //     } else {
+    //         return $currentTime >= $start && $currentTime <= $end;
+    //     }
+    // }
+
+    private function getUserPhoto($user)
     {
-        if (!$provider->is_available) {
-            return false;
-        }
-
-        if (!$provider->work_start_time || !$provider->work_end_time) {
-            return true;
-        }
-
-        $now = Carbon::now();
-        $currentTime = $now->format('H:i:s');
-        $currentDay = strtolower($now->format('l'));
-
-        $offDays = $provider->offDays()->pluck('day')->toArray();
-        if (in_array($currentDay, $offDays)) {
-            return false;
-        }
-
-        $start = $provider->work_start_time;
-        $end = $provider->work_end_time;
-
-        if ($provider->overnight) {
-            return $currentTime >= $start || $currentTime <= $end;
-        } else {
-            return $currentTime >= $start && $currentTime <= $end;
-        }
+        return $user->photo ?? null;
     }
-
-private function getUserPhoto($user)
-{
-    return $user->photo ?? null;
-}
-
 }
