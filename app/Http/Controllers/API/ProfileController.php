@@ -145,9 +145,13 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
-        if ($user->role !== 'user') {
-            return response()->json(['success' => false, 'message' => 'only_customers_can_rate'], 403);
+        // if ($user->role !== 'user') {
+        //     return response()->json(['success' => false, 'message' => 'only_customers_can_rate'], 403);
+        // }
+        if ($user->id == $providerId) {
+            return response()->json(['success' => false, 'message' => 'cannot_rate_yourself'], 403);
         }
+
 
         $providerUser = User::where('id', $providerId)->where('role', 'provider')->first();
 
@@ -198,9 +202,13 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
-        if ($user->role !== 'user') {
-            return response()->json(['success' => false, 'message' => 'only_customers_can_submit_complaints'], 403);
+        // if ($user->role !== 'user') {
+        //     return response()->json(['success' => false, 'message' => 'only_customers_can_submit_complaints'], 403);
+        // }
+        if ($user->id == $providerId) {
+            return response()->json(['success' => false, 'message' => 'cannot_complain_about_yourself'], 403);
         }
+
 
         $providerUser = User::where('id', $providerId)->where('role', 'provider')->first();
 
@@ -238,9 +246,13 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
-        if ($user->role !== 'user') {
-            return response()->json(['success' => false, 'message' => 'only_customers_can_add_favourites'], 403);
+        // if ($user->role !== 'user') {
+        //     return response()->json(['success' => false, 'message' => 'only_customers_can_add_favourites'], 403);
+        // }
+        if ($user->id == $providerId) {
+            return response()->json(['success' => false, 'message' => 'cannot_favourite_yourself'], 403);
         }
+
 
         $providerUser = User::where('id', $providerId)->where('role', 'provider')->first();
 
