@@ -12,6 +12,12 @@ class AdminChatController extends Controller
     {
         $admin = auth()->user();
 
+        $userExists = \App\Models\User::where('id', $userId)->exists();
+
+        if (!$userExists) {
+            return response()->json(['success' => false, 'message' => 'user_not_found'], 404);
+        }
+
         $adminChat = AdminChat::firstOrCreate([
             'admin_id' => $admin->id,
             'user_id' => $userId,
@@ -24,6 +30,7 @@ class AdminChatController extends Controller
             ],
         ]);
     }
+
     public function chatList()
     {
         $admin = auth()->user();

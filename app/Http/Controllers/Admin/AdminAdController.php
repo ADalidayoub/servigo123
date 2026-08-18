@@ -24,6 +24,11 @@ class AdminAdController extends Controller
             return response()->json(['success' => false, 'message' => 'user_not_found'], 404);
         }
 
+        if ($user->role !== 'provider') {
+            return response()->json(['success' => false, 'message' => 'user_is_not_a_provider'], 422);
+        }
+
+
         $imagePath = 'ads/' . uniqid() . '_' . $request->file('image')->getClientOriginalName();
         Storage::disk('public')->put($imagePath, file_get_contents($request->file('image')->getPathname()));
 
