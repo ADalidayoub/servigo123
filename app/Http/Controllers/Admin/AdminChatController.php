@@ -91,6 +91,49 @@ class AdminChatController extends Controller
             'data' => $data,
         ]);
     }
+    // public function sendMessage(Request $request, $adminChatId)
+    // {
+    //     $admin = auth()->user();
+
+    //     $adminChat = AdminChat::find($adminChatId);
+
+    //     if (!$adminChat) {
+    //         return response()->json(['success' => false, 'message' => 'chat_not_found'], 404);
+    //     }
+
+    //     if ($adminChat->admin_id !== $admin->id) {
+    //         return response()->json(['success' => false, 'message' => 'forbidden'], 403);
+    //     }
+
+    //     $request->validate([
+    //         'content' => 'nullable|string',
+    //         'image_url' => 'nullable|string',
+    //         'video_url' => 'nullable|string',
+    //     ]);
+
+    //     $message = $adminChat->messages()->create([
+    //         'sender_type' => 'admin',
+    //         'sender_id' => $admin->id,
+    //         'content' => $request->content,
+    //         'image_url' => $request->image_url,
+    //         'video_url' => $request->video_url,
+    //     ]);
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => [
+    //             'id' => $message->id,
+    //             'sender_type' => $message->sender_type,
+    //             'sender_id' => $message->sender_id,
+    //             'content' => $message->content,
+    //             'image_url' => $message->image_url,
+    //             'video_url' => $message->video_url,
+    //             'created_at' => $message->created_at->toDateTimeString(),
+    //             'time' => $message->created_at->format('H:i'),
+    //             'date' => $message->created_at->format('Y-m-d'),
+    //             'is_mine' => true,
+    //         ],
+    //     ], 201);
+    // }
     public function sendMessage(Request $request, $adminChatId)
     {
         $admin = auth()->user();
@@ -114,9 +157,9 @@ class AdminChatController extends Controller
         $message = $adminChat->messages()->create([
             'sender_type' => 'admin',
             'sender_id' => $admin->id,
-            'content' => $request->content,
-            'image_url' => $request->image_url,
-            'video_url' => $request->video_url,
+            'content' => $request->input('content'),
+            'image_url' => $request->input('image_url'),
+            'video_url' => $request->input('video_url'),
         ]);
         return response()->json([
             'success' => true,
