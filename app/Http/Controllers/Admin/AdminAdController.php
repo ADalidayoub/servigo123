@@ -61,7 +61,7 @@ class AdminAdController extends Controller
                         'name' => $ad->provider?->name ?? 'مستخدم محذوف',
                         'photo' => $ad->provider?->photo ?? null,
                     ],
-                    'image' => $ad->image,
+                    'image' => asset('storage/' . $ad->image),
                     'description' => $ad->description,
                     'created_at' => $ad->created_at->toDateString(),
                 ];
