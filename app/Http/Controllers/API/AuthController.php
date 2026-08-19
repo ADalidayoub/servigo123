@@ -312,35 +312,29 @@ private function handleDeleteAccountOtp($email, $code)
         $provider = $user->provider;
         if ($provider->status === 'rejected') {
             return response()->json([
-                'success' => true,
-                'message' => 'otp_verified',
+                'success' => false,
+                'message' => 'account_rejected',
                 'data' => [
-                    'token' => $accessToken,
-                    'refresh_token' => $refreshToken,
                     'role' => 'provider',
                     'status' => 'rejected',
                     'profile_completed' => false,
                     'is_banned' => $user->is_banned,
-                    'message' => 'account_rejected',
                     'rejection_reason' => $provider->rejection_reason,
                 ]
-            ]);
+            ], 403);
         }
 
         if ($provider->status === 'pending') {
             return response()->json([
-                'success' => true,
-                'message' => 'otp_verified',
+                'success' => false,
+                'message' => 'account_under_review',
                 'data' => [
-                    'token' => $accessToken,
-                    'refresh_token' => $refreshToken,
                     'role' => 'provider',
                     'status' => 'pending',
                     'profile_completed' => false,
                     'is_banned' => $user->is_banned,
-                    'message' => 'account_under_review',
                 ]
-            ]);
+            ], 403);
         }
 
         // approved
@@ -667,35 +661,29 @@ private function handleDeleteAccountOtp($email, $code)
     $provider = $user->provider;
     if ($provider->status === 'rejected') {
         return response()->json([
-            'success' => true,
-            'message' => 'otp_verified',
+            'success' => false,
+            'message' => 'account_rejected',
             'data' => [
-                'token' => $accessToken,
-                'refresh_token' => $refreshToken,
                 'role' => 'provider',
                 'status' => 'rejected',
                 'profile_completed' => false,
                 'is_banned' => $user->is_banned,
-                'message' => 'account_rejected',
                 'rejection_reason' => $provider->rejection_reason,
             ]
-        ]);
+        ], 403);
     }
 
     if ($provider->status === 'pending') {
         return response()->json([
-            'success' => true,
-            'message' => 'otp_verified',
+            'success' => false,
+            'message' => 'account_under_review',
             'data' => [
-                'token' => $accessToken,
-                'refresh_token' => $refreshToken,
                 'role' => 'provider',
                 'status' => 'pending',
                 'profile_completed' => false,
                 'is_banned' => $user->is_banned,
-                'message' => 'account_under_review',
             ]
-        ]);
+        ], 403);
     }
 
     // approved
