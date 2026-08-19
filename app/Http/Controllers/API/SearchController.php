@@ -107,6 +107,7 @@ class SearchController extends Controller
         $topProviders = Provider::where('main_service_id', $main_service_id)
             ->where('status', 'approved')
             ->where('profile_completed', true)
+            ->notBanned()
             ->with('user')
             ->withAvg('ratings', 'rating')
             ->orderBy('ratings_avg_rating', 'desc')
@@ -135,6 +136,51 @@ class SearchController extends Controller
         ]);
     }
 
+    // public function getTopProviders($main_service_id)
+    // {
+    //     $user = auth()->user();
+
+    //     if (!$user) {
+    //         return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
+    //     }
+
+    //     $mainService = Service::find($main_service_id);
+
+    //     if (!$mainService) {
+    //         return response()->json(['success' => false, 'message' => 'main_service_not_found'], 404);
+    //     }
+
+    //     $topProviders = Provider::where('main_service_id', $main_service_id)
+    //         ->where('status', 'approved')
+    //         ->where('profile_completed', true)
+    //         ->with('user')
+    //         ->withAvg('ratings', 'rating')
+    //         ->orderBy('ratings_avg_rating', 'desc')
+    //         ->limit(5)
+    //         ->get()
+    //         ->map(function ($provider) {
+    //             $avgRating = $provider->ratings_avg_rating ?? 0;
+    //             return [
+    //                 'provider_user_id' => $provider->user_id,
+    //                 'name' => $provider->user?->name,
+    //                 'photo' => $this->getUserPhoto($provider->user),
+    //                 'avg_rating' => round($avgRating, 1),
+    //                 'min_price' => (float)($provider->min_price ?? 0),
+    //                 'max_price' => (float)($provider->max_price ?? 0),
+    //                 'currency' => $provider->currency ?? 'USD',
+    //                 'work_type' => $provider->work_type,
+    //                 'location_name' => $provider->location_name,
+    //                 'is_available' => $provider->is_available_now,
+    //             ];
+    //         });
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'success',
+    //         'data' => $topProviders
+    //     ]);
+    // }
+
 
     public function searchProviders(Request $request)
     {
@@ -149,11 +195,18 @@ class SearchController extends Controller
             return $validator;
         }
 
-        $query = Provider::query()
+        // $query = Provider::query()
+        //     ->where('status', 'approved')
+        //     ->where('profile_completed', true)
+        //     ->with('user')
+        //     ->withAvg('ratings', 'rating');
+            $query = Provider::query()
             ->where('status', 'approved')
             ->where('profile_completed', true)
+            ->notBanned()
             ->with('user')
             ->withAvg('ratings', 'rating');
+
 
 
         $query->where('main_service_id', $request->main_service_id);
