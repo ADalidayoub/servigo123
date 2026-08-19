@@ -140,7 +140,7 @@ class ProviderProfileController extends Controller
             'about_me' => 'nullable|string',
             // 'is_available' => 'nullable|boolean',
             'off_days' => 'nullable|array',
-'off_days.*' => 'in:sunday,monday,tuesday,wednesday,thursday,friday,saturday',
+            'off_days.*' => 'in:sunday,monday,tuesday,wednesday,thursday,friday,saturday',
         ]);
 
         DB::beginTransaction();
@@ -154,10 +154,18 @@ class ProviderProfileController extends Controller
             }
             $user->save();
 
-            $providerData = array_diff_key($validated, array_flip(['name', 'phone']));
+            $providerData = array_diff_key($validated, array_flip(['name', 'phone', 'off_days']));
+
             if (!empty($providerData)) {
                 $provider->update($providerData);
             }
+            if (isset($validated['off_days'])) {
+                $provider->offDays()->delete();
+                foreach ($validated['off_days'] as $day) {
+                    $provider->offDays()->create(['day' => $day]);
+                }
+            }
+
 
             DB::commit();
 
