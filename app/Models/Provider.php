@@ -212,18 +212,18 @@ class Provider extends Model
     }
 
 
-    public function scopeOrderByDistance($query, $latitude, $longitude, $direction = 'asc')
-    {
-        $haversine = "(6371 * acos(
-            cos(radians($latitude)) * cos(radians(latitude)) *
-            cos(radians(longitude) - radians($longitude)) +
-            sin(radians($latitude)) * sin(radians(latitude))
-        ))";
+    // public function scopeOrderByDistance($query, $latitude, $longitude, $direction = 'asc')
+    // {
+    //     $haversine = "(6371 * acos(
+    //         cos(radians($latitude)) * cos(radians(latitude)) *
+    //         cos(radians(longitude) - radians($longitude)) +
+    //         sin(radians($latitude)) * sin(radians(latitude))
+    //     ))";
 
-        return $query->select('*')
-            ->selectRaw("{$haversine} AS distance")
-            ->orderBy('distance', $direction);
-    }
+    //     return $query->select('*')
+    //         ->selectRaw("{$haversine} AS distance")
+    //         ->orderBy('distance', $direction);
+    // }
 
 
     public function checkAvailability(): bool

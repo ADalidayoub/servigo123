@@ -200,7 +200,7 @@ class SearchController extends Controller
         //     ->where('profile_completed', true)
         //     ->with('user')
         //     ->withAvg('ratings', 'rating');
-            $query = Provider::query()
+        $query = Provider::query()
             ->where('status', 'approved')
             ->where('profile_completed', true)
             ->notBanned()
@@ -290,11 +290,19 @@ class SearchController extends Controller
             $query->orderBy('min_price', 'asc');
         } elseif ($sortBy === 'rating') {
             $query->orderBy('ratings_avg_rating', 'desc');
-        } elseif ($sortBy === 'location') {
-            $this->applyLocationSorting($query, $request);
         }
 
         $providers = $query->get();
+
+        if ($sortBy === 'location') {
+            $lat = (float) $request->latitude;
+            $lon = (float) $request->longitude;
+
+            $providers = $providers->sortBy(function ($provider) use ($lat, $lon) {
+                return $provider->distanceTo($lat, $lon);
+            })->values();
+        }
+
 
         SearchLog::create([
             'user_id' => $user->id,
@@ -400,21 +408,21 @@ class SearchController extends Controller
         return true;
     }
 
-    private function applyLocationSorting($query, $request)
-    {
-        $lat = (float)$request->latitude;
-        $lon = (float)$request->longitude;
+    // private function applyLocationSorting($query, $request)
+    // {
+    //     $lat = (float)$request->latitude;
+    //     $lon = (float)$request->longitude;
 
-        $haversine = "(6371 * acos(
-            cos(radians($lat)) * cos(radians(latitude)) *
-            cos(radians(longitude) - radians($lon)) +
-            sin(radians($lat)) * sin(radians(latitude))
-        ))";
+    //     $haversine = "(6371 * acos(
+    //         cos(radians($lat)) * cos(radians(latitude)) *
+    //         cos(radians(longitude) - radians($lon)) +
+    //         sin(radians($lat)) * sin(radians(latitude))
+    //     ))";
 
-        $query->select('*')
-            ->selectRaw("{$haversine} AS distance")
-            ->orderBy('distance', 'asc');
-    }
+    //     $query->select('*')
+    //         ->selectRaw("{$haversine} AS distance")
+    //         ->orderBy('distance', 'asc');
+    // }
 
     // private function checkAvailability($provider)
     // {
@@ -447,6 +455,6 @@ class SearchController extends Controller
 
     private function getUserPhoto($user)
     {
-        return $user->photo ?? null;
+        return $user->photo ? asset('storage/' . $user->photo) : null;
     }
 }

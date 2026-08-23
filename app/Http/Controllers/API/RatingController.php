@@ -15,17 +15,24 @@ class RatingController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
-        if ($user->role !== 'user') {
-            return response()->json([
-                'success' => false, 
-                'message' => 'only_customers_can_rate'
-            ], 403);
-        }
+        // if ($user->role !== 'user') {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'only_customers_can_rate'
+        //     ], 403);
+        // }
+        if ($user->id == $request->provider_id) {
+    return response()->json([
+        'success' => false,
+        'message' => 'cannot_rate_yourself'
+    ], 403);
+}
+
 
         $request->validate([
             'provider_id' => 'required|exists:users,id',
@@ -39,7 +46,7 @@ class RatingController extends Controller
 
         if (!$providerUser) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'provider_not_found'
             ], 404);
         }
@@ -50,7 +57,7 @@ class RatingController extends Controller
 
         if ($existingRating) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'you_already_rated_this_provider',
                 'data' => [
                     'existing_rating' => $existingRating->rating,
@@ -84,27 +91,27 @@ class RatingController extends Controller
         ], 201);
     }
 
-    
+
     public function update(Request $request, $id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
         $rating = Rating::find($id);
-        
+
         if (!$rating) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'rating_not_found'
             ], 404);
         }
 
         if ($rating->user_id !== $user->id) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'you_can_only_update_your_own_ratings'
             ], 403);
         }
@@ -139,27 +146,27 @@ class RatingController extends Controller
         ]);
     }
 
-   
+
     public function destroy($id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
         $rating = Rating::find($id);
-        
+
         if (!$rating) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'rating_not_found'
             ], 404);
         }
 
         if ($rating->user_id !== $user->id && $user->role !== 'admin') {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'you_can_only_delete_your_own_ratings'
             ], 403);
         }
@@ -173,11 +180,11 @@ class RatingController extends Controller
         ]);
     }
 
-    
+
     public function getProviderRatings($provider_id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
@@ -188,7 +195,7 @@ class RatingController extends Controller
 
         if (!$providerUser) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'provider_not_found'
             ], 404);
         }
@@ -238,7 +245,7 @@ class RatingController extends Controller
 public function myRatings()
 {
     $user = auth()->user();
-    
+
     if (!$user) {
         return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
     }
@@ -274,20 +281,20 @@ public function myRatings()
     ]);
 }
 
- 
+
     public function show($id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
 
         $rating = Rating::with('user')->find($id);
-        
+
         if (!$rating) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'rating_not_found'
             ], 404);
         }
@@ -319,7 +326,7 @@ public function myRatings()
     public function getProviderAverage($provider_id)
     {
         $user = auth()->user();
-        
+
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'unauthorized'], 401);
         }
@@ -330,14 +337,14 @@ public function myRatings()
 
         if (!$providerUser) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'provider_not_found'
             ], 404);
         }
 
         $average = Rating::where('provider_id', $provider_id)
             ->avg('rating') ?? 0;
-        
+
         $total = Rating::where('provider_id', $provider_id)
             ->count();
 
