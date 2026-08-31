@@ -89,7 +89,8 @@ class AdminServiceController extends Controller
                 'id' => $service->id,
                 'name_ar' => $service->name_ar,
                 'name_en' => $service->name_en,
-                'photo' => $service->photo,
+                'photo' => $service->photo ? asset('storage/' . $service->photo) : null,
+
                 'sub_services' => $service->subServices->map(function ($sub) {
                     return [
                         'id' => $sub->id,

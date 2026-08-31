@@ -32,7 +32,8 @@ class AdminCustomerController extends Controller
         $customers = $query->latest()->get()->map(function ($user) {
             return [
                 'id' => $user->id,
-                'photo' => $user->photo ?? null,
+                'photo' => $user->photo ? asset('storage/' . $user->photo) : null,
+
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
@@ -64,7 +65,8 @@ class AdminCustomerController extends Controller
             'success' => true,
             'data' => [
                 'id' => $user->id,
-                'photo' => $user->photo ?? null,
+                'photo' => $user->photo ? asset('storage/' . $user->photo) : null,
+
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,

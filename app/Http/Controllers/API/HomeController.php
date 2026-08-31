@@ -37,7 +37,8 @@ class HomeController extends Controller
                 return [
                     'provider_user_id' => $providerUser->id,
                     'name' => $providerUser->name,
-                    'photo' => $providerUser->photo ?? null,
+                    'photo' => $providerUser->photo ? asset('storage/' . $providerUser->photo) : null,
+
                     'main_service' => $provider?->mainService ? [
                         'name_ar' => $provider->mainService->name_ar,
                         'name_en' => $provider->mainService->name_en,
@@ -70,8 +71,9 @@ class HomeController extends Controller
                     'ad_id' => $ad->id,
                     'provider_user_id' => $providerUser->id,
                     'provider_name' => $providerUser->name,
-                    'provider_photo' => $providerUser->photo ?? null,
-                    'ad_image' => $ad->image,
+                    'provider_photo' => $providerUser->photo ? asset('storage/' . $providerUser->photo) : null,
+                    'ad_image' => $ad->image ? asset('storage/' . $ad->image) : null,
+
                     'description' => $ad->description,
                 ];
             })

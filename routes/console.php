@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 Schedule::command('providers:force-delete-expired')->everyMinute();
 Schedule::command('ads:delete-expired')->daily();
+Schedule::command('cleanup:pending-registrations')->hourly();

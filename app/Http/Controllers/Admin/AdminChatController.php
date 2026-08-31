@@ -50,7 +50,7 @@ class AdminChatController extends Controller
                 'admin_chat_id' => $chat->id,
                 'user_id' => $chat->user->id,
                 'user_name' => $chat->user->trashed() ? 'مستخدم محذوف' : $chat->user->name,
-                'user_photo' => $chat->user->trashed() ? null : $chat->user->photo,
+                'user_photo' => (!$chat->user->trashed() && $chat->user->photo) ? asset('storage/' . $chat->user->photo) : null,,
                 'last_message' => $lastMessage?->content ?? '',
                 'last_message_time' => $lastMessage?->created_at,
             ];
